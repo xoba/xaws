@@ -31,8 +31,9 @@ type Attachment struct {
 	MimeType string
 }
 
+// will try sending with attachments, and if that fails due to length limit, will try sending without attachments.
 func SendEmail(es CoreEmailSpec) (string, error) {
-	s, n, err := sendEmailAndLength(es)
+	s, n, err := SendEmailWithLength(es)
 	if err != nil {
 		max := MaxEmailBytesSESV2
 		if n > max {
@@ -57,7 +58,8 @@ func SendEmail(es CoreEmailSpec) (string, error) {
 	return s, err
 }
 
-func sendEmailAndLength(es CoreEmailSpec) (string, int, error) {
+// sends email and returns with length of raw email data, in bytes, even on error.
+func SendEmailWithLength(es CoreEmailSpec) (string, int, error) {
 	master := enmime.Builder().
 		Subject(es.Subject).
 		HTML([]byte(es.HTML)).
