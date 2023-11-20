@@ -34,7 +34,7 @@ type File interface {
 }
 
 // for large uploads
-func UploadMultipart(svc *s3.Client, c context.Context, f File, bucket, key string) (*MultipartResponse, error) {
+func UploadMultipart(c context.Context, svc *s3.Client, f File, bucket, key string) (*MultipartResponse, error) {
 	fi, err := f.Stat()
 	if err != nil {
 		return nil, err
