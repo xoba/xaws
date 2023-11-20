@@ -32,8 +32,8 @@ type Attachment struct {
 }
 
 // will try sending with attachments, and if that fails due to length limit, will try sending without attachments.
-func SendEmail(es CoreEmailSpec) (string, error) {
-	s, n, err := SendEmailWithLength(es)
+func SendEmail(svc *sesv2.Client, es CoreEmailSpec) (string, error) {
+	s, n, err := SendEmailWithLength(svc, es)
 	if err != nil {
 		max := MaxEmailBytesSESV2
 		if n > max {
@@ -51,7 +51,7 @@ func SendEmail(es CoreEmailSpec) (string, error) {
 					MimeType: "text/plain",
 				},
 			}
-			return SendEmail(es)
+			return SendEmail(svc, es)
 		}
 		return s, err
 	}
@@ -59,7 +59,7 @@ func SendEmail(es CoreEmailSpec) (string, error) {
 }
 
 // sends email and returns with length of raw email data, in bytes, even on error.
-func SendEmailWithLength(es CoreEmailSpec) (string, int, error) {
+func SendEmailWithLength(svc *sesv2.Client, es CoreEmailSpec) (string, int, error) {
 	master := enmime.Builder().
 		Subject(es.Subject).
 		HTML([]byte(es.HTML)).
@@ -88,10 +88,6 @@ func SendEmailWithLength(es CoreEmailSpec) (string, int, error) {
 	}
 	rawData := new(bytes.Buffer)
 	if err := p.Encode(rawData); err != nil {
-		return "", 0, err
-	}
-	svc, err := NewSesV2()
-	if err != nil {
 		return "", 0, err
 	}
 	resp, err := svc.SendEmail(context.Background(), &sesv2.SendEmailInput{
