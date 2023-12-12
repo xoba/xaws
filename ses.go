@@ -26,9 +26,10 @@ type CoreEmailSpec struct {
 }
 
 type Attachment struct {
-	Filename string
-	Content  []byte
-	MimeType string
+	Filename  string
+	Content   []byte
+	MimeType  string
+	ContentID string // optional, will be inline if present
 }
 
 // will try sending with attachments, and if that fails due to length limit, will try sending without attachments.
@@ -64,14 +65,11 @@ func SendEmailWithLength(svc *sesv2.Client, es CoreEmailSpec) (string, int, erro
 		Subject(es.Subject).
 		HTML([]byte(es.HTML)).
 		From(es.From.Name, es.From.Address)
-	var destinations []string
 	for _, to := range es.To {
 		master = master.To(to.Name, to.Address)
-		destinations = append(destinations, to.Address)
 	}
 	for _, cc := range es.Cc {
 		master = master.CC(cc.Name, cc.Address)
-		destinations = append(destinations, cc.Address)
 	}
 	if irt := es.InReplyTo; len(irt) > 0 {
 		master = master.Header("In-Reply-To", irt)
@@ -79,8 +77,19 @@ func SendEmailWithLength(svc *sesv2.Client, es CoreEmailSpec) (string, int, erro
 	if refs := es.References; len(refs) > 0 {
 		master = master.Header("References", strings.Join(refs, " "))
 	}
-	for _, a := range es.Attachments {
-		master = master.AddAttachment(a.Content, a.MimeType, a.Filename)
+	{
+		uniques := make(map[string]bool)
+		for _, a := range es.Attachments {
+			if id := a.ContentID; len(id) > 0 {
+				if uniques[id] {
+					return "", 0, fmt.Errorf("duplicate content ID %q", id)
+				}
+				uniques[id] = true
+				master = master.AddInline(a.Content, a.MimeType, a.Filename, id)
+			} else {
+				master = master.AddAttachment(a.Content, a.MimeType, a.Filename)
+			}
+		}
 	}
 	p, err := master.Build()
 	if err != nil {
