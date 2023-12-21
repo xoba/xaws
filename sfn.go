@@ -27,7 +27,6 @@ func RunActivity[IN, OUT any](
 	heartbeatInterval time.Duration,
 	activityFunc func(IN, TaskContext) (OUT, error),
 ) error {
-	log.Printf("RunActivity(%q)", workerName)
 	for {
 		select {
 		case <-c.Done():
@@ -60,7 +59,6 @@ func RunActivity[IN, OUT any](
 					case <-ctx.Done():
 						return
 					case <-time.After(heartbeatInterval / 2):
-						log.Printf("sending heartbeat")
 						if _, err := svc.SendTaskHeartbeat(c, &sfn.SendTaskHeartbeatInput{
 							TaskToken: r.TaskToken,
 						}); err != nil {
