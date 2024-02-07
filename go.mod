@@ -1,6 +1,6 @@
 module github.com/xoba/xaws
 
-go 1.21.4
+go 1.22.0
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.24.1
@@ -34,7 +34,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/rivo/uniseg v0.4.4 // indirect
+	github.com/rivo/uniseg v0.4.6 // indirect
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
 	golang.org/x/net v0.20.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
