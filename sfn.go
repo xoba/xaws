@@ -82,7 +82,7 @@ func RunActivity[IN, OUT any](
 					return fmt.Errorf("can't send task success: %w", err)
 				}
 			case err == ErrDeferTaskTokenResponse:
-			case err != nil:
+			default:
 				log.Printf("worker %q task failed: %v", workerName, err)
 				const max = 200
 				myError := err.Error()
@@ -96,8 +96,6 @@ func RunActivity[IN, OUT any](
 				}); err != nil {
 					return fmt.Errorf("can't send task failure: %w", err)
 				}
-			default:
-				return fmt.Errorf("illegal default case")
 			}
 			return nil
 		}(); err != nil {
