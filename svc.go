@@ -19,12 +19,16 @@ func NewSesV2() (*sesv2.Client, error) {
 	return sesv2.NewFromConfig(c), nil
 }
 
+// eliminates gratuitous warnings, thanks to https://tsak.dev/posts/aws-sdk-suppress-checksum-warning/
+// e.g., SDK 2025/02/17 16:36:44 WARN Response has no supported checksum. Not validating response payload.
 func NewS3() (*s3.Client, error) {
 	c, err := newConfig()
 	if err != nil {
 		return nil, err
 	}
-	return s3.NewFromConfig(c), nil
+	return s3.NewFromConfig(c, func(o *s3.Options) {
+		o.DisableLogOutputChecksumValidationSkipped = true
+	}), nil
 }
 
 func NewKMS() (*kms.Client, error) {
