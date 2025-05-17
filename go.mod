@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.79.3
 	github.com/aws/aws-sdk-go-v2/service/sesv2 v1.45.0
 	github.com/aws/aws-sdk-go-v2/service/sfn v1.35.4
-	github.com/jhillyerd/enmime v1.3.0
+	github.com/jhillyerd/enmime/v2 v2.1.0
 )
 
 require (
@@ -36,6 +36,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
-	golang.org/x/net v0.37.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
+	golang.org/x/net v0.40.0 // indirect
+	golang.org/x/text v0.25.0 // indirect
 )
