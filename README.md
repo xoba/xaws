@@ -40,12 +40,12 @@ import (
     "github.com/xoba/xaws"
 )
 
-func uploadFile(f xaws.File) error {
+func uploadFile(f xaws.File, bucket, key string) error {
     s3Client, err := xaws.NewS3()
     if err != nil {
         return err
     }
-    _, err = xaws.UploadMultipart(context.Background(), s3Client, f, "bucket", "key")
+    _, err = xaws.UploadMultipart(context.Background(), s3Client, f, bucket, key)
     return err
 }
 ```
