@@ -34,7 +34,7 @@ type File interface {
 }
 
 // for large uploads
-func UploadMultipart(c context.Context, svc *s3.Client, f File, bucket, key string) (*MultipartResponse, error) {
+func UploadMultipart(c context.Context, svc *s3.Client, f File, bucket, key string) (_ *MultipartResponse, err error) {
 	fi, err := f.Stat()
 	if err != nil {
 		return nil, err
@@ -66,6 +66,15 @@ func UploadMultipart(c context.Context, svc *s3.Client, f File, bucket, key stri
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		if err != nil {
+			_, _ = svc.AbortMultipartUpload(c, &s3.AbortMultipartUploadInput{
+				Bucket:   aws.String(bucket),
+				Key:      aws.String(key),
+				UploadId: m.UploadId,
+			})
+		}
+	}()
 	var n int
 	var partNumber int32
 	var completedParts []types.CompletedPart
@@ -79,7 +88,7 @@ func UploadMultipart(c context.Context, svc *s3.Client, f File, bucket, key stri
 			return nil, err
 		}
 		n += bytesRead
-		resp, err := svc.UploadPart(context.Background(), &s3.UploadPartInput{
+		resp, err := svc.UploadPart(c, &s3.UploadPartInput{
 			Bucket:     aws.String(bucket),
 			Key:        aws.String(key),
 			UploadId:   m.UploadId,
@@ -94,7 +103,7 @@ func UploadMultipart(c context.Context, svc *s3.Client, f File, bucket, key stri
 			PartNumber: ptr(partNumber),
 		})
 	}
-	if _, err = svc.CompleteMultipartUpload(context.Background(), &s3.CompleteMultipartUploadInput{
+	if _, err = svc.CompleteMultipartUpload(c, &s3.CompleteMultipartUploadInput{
 		Bucket:   aws.String(bucket),
 		Key:      aws.String(key),
 		UploadId: m.UploadId,
