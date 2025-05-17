@@ -23,17 +23,19 @@ const (
 	MaxTotalSize = 5 * TB
 )
 
+// MultipartResponse summarizes the multipart upload result.
 type MultipartResponse struct {
 	BytesUploaded int
 	PartsUploaded int
 }
 
+// File represents a readable object that can report its size.
 type File interface {
 	io.Reader
 	Stat() (fs.FileInfo, error)
 }
 
-// for large uploads
+// UploadMultipart performs a multipart upload for large objects.
 func UploadMultipart(c context.Context, svc *s3.Client, f File, bucket, key string) (*MultipartResponse, error) {
 	fi, err := f.Stat()
 	if err != nil {
