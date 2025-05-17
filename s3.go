@@ -55,7 +55,14 @@ func UploadMultipart(c context.Context, svc *s3.Client, f File, bucket, key stri
 	case fi.Size() > MaxTotalSize:
 		return nil, fmt.Errorf("file too big: %d vs %d", fi.Size(), MaxTotalSize)
 	}
-	const partSize = MaxPartSize / 5
+	const maxParts = 10000
+	partSize := int(fi.Size() / maxParts)
+	if fi.Size()%maxParts != 0 {
+		partSize++
+	}
+	if partSize < MinPartSize {
+		partSize = MinPartSize
+	}
 	if partSize > MaxPartSize {
 		return nil, fmt.Errorf("part size too big: %d vs %d", partSize, MaxPartSize)
 	}
@@ -79,7 +86,7 @@ func UploadMultipart(c context.Context, svc *s3.Client, f File, bucket, key stri
 			return nil, err
 		}
 		n += bytesRead
-		resp, err := svc.UploadPart(context.Background(), &s3.UploadPartInput{
+		resp, err := svc.UploadPart(c, &s3.UploadPartInput{
 			Bucket:     aws.String(bucket),
 			Key:        aws.String(key),
 			UploadId:   m.UploadId,
@@ -94,7 +101,7 @@ func UploadMultipart(c context.Context, svc *s3.Client, f File, bucket, key stri
 			PartNumber: ptr(partNumber),
 		})
 	}
-	if _, err = svc.CompleteMultipartUpload(context.Background(), &s3.CompleteMultipartUploadInput{
+	if _, err = svc.CompleteMultipartUpload(c, &s3.CompleteMultipartUploadInput{
 		Bucket:   aws.String(bucket),
 		Key:      aws.String(key),
 		UploadId: m.UploadId,
