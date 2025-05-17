@@ -13,6 +13,7 @@ import (
 	"github.com/jhillyerd/enmime/v2"
 )
 
+// CoreEmailSpec describes the contents of an email.
 type CoreEmailSpec struct {
 	Subject     string
 	From        mail.Address
@@ -25,6 +26,7 @@ type CoreEmailSpec struct {
 	Attachments []Attachment
 }
 
+// Attachment holds metadata and content for an email attachment.
 type Attachment struct {
 	Filename  string
 	Content   []byte
@@ -32,7 +34,7 @@ type Attachment struct {
 	ContentID string // optional, will be inline if present
 }
 
-// will try sending with attachments, and if that fails due to length limit, will try sending without attachments.
+// SendEmail attempts to send an email and retries without attachments if it exceeds the size limit.
 func SendEmail(svc *sesv2.Client, es CoreEmailSpec) (string, error) {
 	s, n, err := SendEmailWithLength(svc, es)
 	if err != nil {
@@ -59,7 +61,7 @@ func SendEmail(svc *sesv2.Client, es CoreEmailSpec) (string, error) {
 	return s, err
 }
 
-// sends email and returns with length of raw email data, in bytes, even on error.
+// SendEmailWithLength sends an email and reports the raw message size.
 func SendEmailWithLength(svc *sesv2.Client, es CoreEmailSpec) (string, int, error) {
 	master := enmime.Builder().
 		Subject(es.Subject).
@@ -118,10 +120,12 @@ func SendEmailWithLength(svc *sesv2.Client, es CoreEmailSpec) (string, int, erro
 	return fmt.Sprintf("<%s@email.amazonses.com>", *resp.MessageId), rawData.Len(), nil
 }
 
+// ptr returns a pointer to the provided value.
 func ptr[T any](t T) *T {
 	return &t
 }
 
+// convertAddrs extracts the address strings from a slice of mail.Address.
 func convertAddrs(list []mail.Address) []string {
 	var out []string
 	for _, x := range list {

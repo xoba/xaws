@@ -15,10 +15,12 @@ import (
 // if an activity function returns this, that means it wants to handle the task token response itself.
 var ErrDeferTaskTokenResponse = errors.New("task token response deferred")
 
+// TaskContext contains the Step Functions task token.
 type TaskContext struct {
 	TaskToken string
 }
 
+// RunActivity polls for a task and executes activityFunc when one arrives.
 func RunActivity[IN, OUT any](
 	c context.Context,
 	svc *sfn.Client,
