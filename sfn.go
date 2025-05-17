@@ -62,7 +62,7 @@ func RunActivity[IN, OUT any](
 						if _, err := svc.SendTaskHeartbeat(c, &sfn.SendTaskHeartbeatInput{
 							TaskToken: r.TaskToken,
 						}); err != nil {
-							log.Printf("can't send task hearbeat: %v", err)
+							log.Printf("can't send task heartbeat: %v", err)
 						}
 					}
 				}
