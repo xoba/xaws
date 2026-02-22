@@ -120,11 +120,6 @@ func SendEmailWithLength(svc *sesv2.Client, es CoreEmailSpec) (string, int, erro
 	return fmt.Sprintf("<%s@email.amazonses.com>", *resp.MessageId), rawData.Len(), nil
 }
 
-// ptr returns a pointer to the provided value.
-func ptr[T any](t T) *T {
-	return &t
-}
-
 // convertAddrs extracts the address strings from a slice of mail.Address.
 func convertAddrs(list []mail.Address) []string {
 	var out []string
