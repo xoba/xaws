@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -64,7 +64,7 @@ func RunActivity[IN, OUT any](
 						if _, err := svc.SendTaskHeartbeat(c, &sfn.SendTaskHeartbeatInput{
 							TaskToken: r.TaskToken,
 						}); err != nil {
-							log.Printf("can't send task heartbeat: %v", err)
+							slog.Warn("can't send task heartbeat", "error", err)
 						}
 					}
 				}
@@ -85,7 +85,7 @@ func RunActivity[IN, OUT any](
 				}
 			case err == ErrDeferTaskTokenResponse:
 			default:
-				log.Printf("worker %q task failed: %v", workerName, err)
+				slog.Warn("worker task failed", "worker", workerName, "error", err)
 				const max = 200
 				myError := err.Error()
 				if len(myError) > max {
@@ -101,7 +101,7 @@ func RunActivity[IN, OUT any](
 			}
 			return nil
 		}(); err != nil {
-			log.Printf("error in long poll for %q: %v", workerName, err)
+			slog.Warn("error in long poll", "worker", workerName, "error", err)
 			time.Sleep(time.Second)
 		}
 	}
